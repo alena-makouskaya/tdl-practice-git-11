@@ -1,13 +1,18 @@
-import { addTodolistAC, AddTodolistActionType, RemoveTodolistActionType } from "./todolists-reducer";
+import {
+  addTodolistAC,
+  AddTodolistActionType,
+  RemoveTodolistActionType,
+} from "./todolists-reducer";
 import { v1 } from "uuid";
-import { TasksStateType } from "../AppWithRedux";
+import { TasksStateType } from "../App";
 import { title } from "process";
+import { TaskPriorities, TaskStatuses } from "../api/todolists-api";
 
 export type ChangeTaskStatusActionType = {
   type: "CHANGE-TASK-STATUS";
   todolistId: string;
   taskId: string;
-  isDone: boolean;
+  status: TaskStatuses;
 };
 
 export type EditTaskTitleActionType = {
@@ -35,64 +40,61 @@ type ActionType =
   | EditTaskTitleActionType
   | ChangeTaskStatusActionType
   | AddTodolistActionType
-  | RemoveTodolistActionType
-  ;
+  | RemoveTodolistActionType;
 
-  let initialState: TasksStateType = {
+let initialState: TasksStateType = {};
 
-  }
-
-export const tasksReducer = (state: TasksStateType = initialState, action: ActionType): TasksStateType => {
+export const tasksReducer = (
+  state: TasksStateType = initialState,
+  action: ActionType
+): TasksStateType => {
   switch (action.type) {
     case "REMOVE-TASK": {
-      let tasksInTodolist = state[action.todolistId];
-
-      let newtasks = tasksInTodolist.filter((t) => t.id !== action.taskId);
-
-      state[action.todolistId] = newtasks;
-
-      return { ...state };
+      return {
+        ...state,
+        [action.todolistId]: state[action.todolistId].filter(
+          (task) => task.id !== action.taskId
+        ),
+      };
     }
 
     case "ADD-TASK": {
-      let tasksInTodolist = state[action.todolistId];
-
-      let newTasks = [
-        {
-          id: v1(),
-          title: action.title,
-          isDone: false,
-        },
-        ...tasksInTodolist,
-      ];
-
-      state[action.todolistId] = newTasks;
-
-      return { ...state };
+      return {
+        ...state,
+        [action.todolistId]: [
+          {
+            todolistId: action.todolistId,
+            id: v1(),
+            title: action.title,
+            description: "",
+            status: TaskStatuses.New,
+            priority: TaskPriorities.Low,
+            startDate: "",
+            deadline: "",
+            order: 0,
+            addedDate: "",
+          },
+          ...state[action.todolistId],
+        ],
+      };
     }
 
     case "EDIT-TASK-TITLE": {
-      let tasksInTodolist = state[action.todolistId];
-
-      let task = tasksInTodolist.find((t) => t.id === action.taskId);
-
-      if (task) {
-        task.title = action.title;
-      }
-
-      return { ...state };
+      return {
+        ...state,
+        [action.todolistId]: state[action.todolistId].map((task) =>
+          task.id === action.taskId ? { ...task, title: action.title } : task
+        ),
+      };
     }
 
     case "CHANGE-TASK-STATUS": {
-      let tasksInTodolist = state[action.todolistId];
-
-      let task = tasksInTodolist.find((t) => t.id === action.taskId);
-
-      if (task) {
-        task.isDone = action.isDone;
-      }
-
-      return { ...state };
+      return {
+        ...state,
+        [action.todolistId]: state[action.todolistId].map((task) =>
+          task.id === action.taskId ? { ...task, status: action.status } : task
+        ),
+      };
     }
 
     case "ADD-TODOLIST": {
@@ -103,19 +105,16 @@ export const tasksReducer = (state: TasksStateType = initialState, action: Actio
       return stateCopy;
     }
 
-    case "REMOVE-TODOLIST":{
-      const stateCopy = {...state}
-      delete stateCopy[action.todolistId]
-      return stateCopy
-
+    case "REMOVE-TODOLIST": {
+      const stateCopy = { ...state };
+      delete stateCopy[action.todolistId];
+      return stateCopy;
     }
 
     default:
-      return state
+      return state;
   }
 };
-
-
 
 export const RemoveTaskAC = (
   todolistId: string,
@@ -155,12 +154,12 @@ export const EditTaskTitleAC = (
 export const ChangeTaskStatusAC = (
   todolistId: string,
   taskId: string,
-  isDone: boolean
+  status: TaskStatuses
 ): ChangeTaskStatusActionType => {
   return {
     type: "CHANGE-TASK-STATUS",
     todolistId,
     taskId,
-    isDone,
+    status,
   };
 };

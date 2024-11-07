@@ -1,16 +1,16 @@
 // @flow
 import * as React from "react";
-import { TasksPropsType } from "./Todolist";
 import { EditableSpan } from "./EditableSpan";
+import { TaskStatuses, TaskType } from "../api/todolists-api";
 type TaskPropsType = {
   todolistId: string;
-  task: TasksPropsType;
+  task: TaskType;
 
   removeTask: (todolistId: string, taskId: string) => void;
   changeTaskStatus: (
     todolistId: string,
     taskId: string,
-    isDone: boolean
+    status: TaskStatuses
   ) => void;
   editTaskTitle: (todolistId: string, taskId: string, title: string) => void;
 };
@@ -22,7 +22,8 @@ export const Task = React.memo((props: TaskPropsType) => {
     props;
 
   const changeTaskStatusHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-    changeTaskStatus(todolistId, task.id, e.currentTarget.checked);
+    let value = e.currentTarget.checked
+    changeTaskStatus(todolistId, task.id, value ? TaskStatuses.Completed : TaskStatuses.New);
   };
 
   const editTaskTitleHandler = React.useCallback((title: string) => {
@@ -37,7 +38,7 @@ export const Task = React.memo((props: TaskPropsType) => {
     <li>
       <input
         type="checkbox"
-        checked={task.isDone}
+        checked={task.status === TaskStatuses.Completed ? true : false}
         onChange={changeTaskStatusHandler}
       />
       <EditableSpan title={task.title} callBack={editTaskTitleHandler} />

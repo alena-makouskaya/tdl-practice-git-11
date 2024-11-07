@@ -1,28 +1,24 @@
 // @flow
 import * as React from "react";
-import { KeyboardEvent } from "react";
-import { FilterValueType } from "../App";
+
 import { AddItemForm } from "./AddItemForm";
 import { EditableSpan } from "./EditableSpan";
 import { Task } from "./Task";
-export type TasksPropsType = {
-  id: string;
-  title: string;
-  isDone: boolean;
-};
+import { TaskStatuses, TaskType } from "../api/todolists-api";
+import { FilterValueType } from "../state/todolists-reducer";
 
 type TodolistPropsType = {
   id: string;
   title: string;
   filter: FilterValueType;
-  tasks: TasksPropsType[];
+  tasks: TaskType[];
 
   removeTask: (todolistId: string, taskId: string) => void;
   addTask: (todolistId: string, title: string) => void;
   changeTaskStatus: (
     todolistId: string,
     taskId: string,
-    isDone: boolean
+    status: TaskStatuses
   ) => void;
   editTaskTitle: (todolistId: string, taskId: string, title: string) => void;
 
@@ -47,10 +43,12 @@ export const Todolist = React.memo((props: TodolistPropsType) => {
     editTodolistTitle,
   } = props;
 
-
-  const addTaskHandler = React.useCallback((title: string) => {
-    addTask(id, title);
-  }, [addTask, id]);
+  const addTaskHandler = React.useCallback(
+    (title: string) => {
+      addTask(id, title);
+    },
+    [addTask, id]
+  );
 
   const changeTodolistFilterAll = React.useCallback(() => {
     changeTodolistFilter(id, "all");
@@ -68,18 +66,21 @@ export const Todolist = React.memo((props: TodolistPropsType) => {
     removeTodolist(id);
   }, [removeTodolist, id]);
 
-  const editTodolistTitleHandler = React.useCallback((title: string) => {
-    editTodolistTitle(id, title);
-  }, [editTodolistTitle, id]);
+  const editTodolistTitleHandler = React.useCallback(
+    (title: string) => {
+      editTodolistTitle(id, title);
+    },
+    [editTodolistTitle, id]
+  );
 
   let filteredTasks = tasks;
 
   if (filter === "active") {
-    filteredTasks = tasks.filter((t) => t.isDone === false);
+    filteredTasks = tasks.filter((t) => t.status === TaskStatuses.New);
   }
 
   if (filter === "completed") {
-    filteredTasks = tasks.filter((t) => t.isDone === true);
+    filteredTasks = tasks.filter((t) => t.status === TaskStatuses.Completed);
   }
 
   return (
@@ -95,7 +96,7 @@ export const Todolist = React.memo((props: TodolistPropsType) => {
         {filteredTasks.map((t) => {
           return (
             <Task
-            key={t.id}
+              key={t.id}
               todolistId={id}
               task={t}
               removeTask={removeTask}
