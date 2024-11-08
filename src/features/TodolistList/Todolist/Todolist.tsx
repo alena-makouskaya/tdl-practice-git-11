@@ -10,11 +10,13 @@ import { fetchTaskTC } from "../../../state/tasks-reducer";
 import { useEffect } from "react";
 import { useAppDispatch } from "../../../app/store";
 import { Task } from "./Task/Task";
+import { RequestStatus } from "../../../app/app-reducer";
 
 type TodolistPropsType = {
   id: string;
   title: string;
   filter: FilterValueType;
+  entityStatus: RequestStatus
   tasks: TaskType[];
 
   removeTask: (todolistId: string, taskId: string) => void;
@@ -40,6 +42,7 @@ export const Todolist = React.memo((props: TodolistPropsType) => {
     id,
     title,
     filter,
+    entityStatus,
     tasks,
     removeTask,
     addTask,
@@ -48,6 +51,7 @@ export const Todolist = React.memo((props: TodolistPropsType) => {
     removeTodolist,
     editTaskTitle,
     editTodolistTitle,
+    
   } = props;
 
 
@@ -103,10 +107,10 @@ export const Todolist = React.memo((props: TodolistPropsType) => {
     <div className="tdlCard" key={id}>
       <h3>
         <EditableSpan title={title} callBack={editTodolistTitleHandler} />-{" "}
-        <button onClick={removeTodolistHandler}> x </button>
+        <button onClick={removeTodolistHandler} disabled={entityStatus === "loading"}> x </button>
       </h3>
 
-      <AddItemForm callBack={addTaskHandler} />
+      <AddItemForm callBack={addTaskHandler} disabled={entityStatus === 'loading'}/>
 
       <ul>
         {filteredTasks.map((t) => {

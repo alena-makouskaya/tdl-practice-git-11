@@ -1,46 +1,27 @@
 import React, { useCallback, useEffect, useReducer, useState } from "react";
-import logo from "./logo.svg";
+
 import "./App.css";
-import { Todolist } from "../features/TodolistList/Todolist/Todolist";
 
-import { AddItemForm } from "../components/AddItemForm/AddItemForm";
-import {
-  addTodolistAC,
-  addTodolistTC,
-  changeTodolistFilterAC,
-  editTodolistTitleAC,
-  editTodolistTitleTC,
-  fetchTodolistsTC,
-  FilterValueType,
-  removeTodolistAC,
-  removeTodolistTC,
-  setTodolistsAC,
-  TodolistDomainType,
-  todolistsReducer,
-} from "../state/todolists-reducer";
-import {
-  AddTaskAC,
-  addTaskTC,
-  RemoveTaskAC,
-  removeTaskTC,
-  tasksReducer,
-  TasksStateType,
-  updateTaskTC,
-} from "../state/tasks-reducer";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { AppRootState, useAppDispatch } from "./store";
-import { TaskStatuses, TaskType, todolistAPI } from "../api/todolists-api";
 import { TodolistList } from "../features/TodolistList/TodolistList";
-
-
+import { LinearProgress } from "../components/LinearProgress/LinearProgress";
+import { RequestStatus } from "./app-reducer";
+import { ErrorSnackbar } from "../components/ErrorSnackbar/ErrorSnackbar";
 
 const App = React.memo(() => {
   console.log("App is called");
 
+  const status = useSelector<AppRootState, RequestStatus>(
+    (state) => state.app.status
+  );
+
   return (
     <div className="App">
-      <TodolistList />
+      {status === "loading" && <LinearProgress />}
+      <ErrorSnackbar /> 
 
+      <TodolistList />
     </div>
   );
 });

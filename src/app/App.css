@@ -1,27 +1,43 @@
 .App {
   padding: 120px;
-
   display: flex;
+  flex-direction: column;
 
   gap: 40px;
 }
 
-.tdlCard{
+.tdlCard {
   padding: 32px;
 
   border: 1px solid #e5e5e5;
   border-radius: 12px;
-
 }
 
-.errorText{
+.errorText {
   color: red;
 }
 
-.error{
+.error {
   border: 1px solid red;
 }
 
-.isActive{
+.isActive {
   background-color: aqua;
+}
+
+.linearProgress {
+  padding: 12px 16px;
+  border: 1px solid rgb(255, 83, 83);
+  background-color: rgb(255, 243, 243) ;
+  border-radius: 12px;
+}
+
+.errorSnackbar {
+  padding: 12px 16px;
+  border: 1px solid rgb(255, 83, 83);
+  background-color: rgb(255, 243, 243) ;
+  border-radius: 12px;
+
+  display: flex;
+  justify-content: space-between;
 }

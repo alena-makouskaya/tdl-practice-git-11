@@ -4,8 +4,6 @@ import {
   SetTodolistsActionType,
 } from "./todolists-reducer";
 
-
-
 import {
   TaskType,
   todolistAPI,
@@ -13,6 +11,16 @@ import {
 } from "../api/todolists-api";
 import { Dispatch } from "redux";
 import { AppRootState } from "../app/store";
+import {
+  ResultCode,
+  setAppErrorAC,
+  SetAppErrorActionType,
+  setAppStatusAC,
+  SetAppStatusActionType,
+} from "../app/app-reducer";
+import { error } from "console";
+import { handleServerAppError } from "../common/utils/handleServerAppError";
+import { handleServerNetworkError } from "../common/utils/handleServerNetworkError";
 
 let initialState: TasksStateType = {};
 
@@ -97,27 +105,61 @@ export const UpdateTaskAC = (
 ) => ({ type: "UPDATE-TASK", todolistId, taskId, model } as const);
 
 // thunks
-export const fetchTaskTC = (todolistId: string) => (dispatch: Dispatch<ActionsType>) => {
-  todolistAPI.getTasks(todolistId).then((res) => {
-    const action = SetTasksAC(todolistId, res.data.items);
-    dispatch(action);
-  });
-};
+export const fetchTaskTC =
+  (todolistId: string) =>
+  (dispatch: Dispatch<ActionsType | SetAppStatusActionType>) => {
+    dispatch(setAppStatusAC("loading"));
+    todolistAPI
+      .getTasks(todolistId)
+      .then((res) => {
+        const action = SetTasksAC(todolistId, res.data.items);
+        dispatch(setAppStatusAC("succeeded"));
+        dispatch(action);
+      })
+      .catch((error) => {
+        handleServerNetworkError(error, dispatch);
+      });
+  };
 
 export const removeTaskTC =
-  (todolistId: string, taskId: string) => (dispatch: Dispatch<ActionsType>) => {
-    todolistAPI.delteTask(todolistId, taskId).then((res) => {
-      const action = RemoveTaskAC(todolistId, taskId);
-      dispatch(action);
-    });
+  (todolistId: string, taskId: string) =>
+  (
+    dispatch: Dispatch<
+      ActionsType | SetAppStatusActionType | SetAppErrorActionType
+    >
+  ) => {
+    dispatch(setAppStatusAC("loading"));
+    todolistAPI
+      .delteTask(todolistId, taskId)
+      .then((res) => {
+        const action = RemoveTaskAC(todolistId, taskId);
+        dispatch(setAppStatusAC("succeeded"));
+        dispatch(action);
+      })
+      .catch((error) => {
+        handleServerNetworkError(error, dispatch);
+      });
   };
 
 export const addTaskTC =
-  (todolistId: string, title: string) => (dispatch: Dispatch<ActionsType>) => {
-    todolistAPI.createTask(todolistId, title).then((res) => {
-      const action = AddTaskAC(res.data.data.item);
-      dispatch(action);
-    });
+  (todolistId: string, title: string) =>
+  (
+    dispatch: Dispatch<
+      ActionsType | SetAppStatusActionType | SetAppErrorActionType
+    >
+  ) => {
+    dispatch(setAppStatusAC("loading"));
+    todolistAPI
+      .createTask(todolistId, title)
+      .then((res) => {
+        if (res.data.resultCode === ResultCode.Success) {
+          dispatch(AddTaskAC(res.data.data.item));
+          dispatch(setAppStatusAC("succeeded"));
+        } else {
+          handleServerAppError(res.data, dispatch);
+        }
+      })
+      .catch((error) => handleServerNetworkError(error, dispatch));
   };
 
 export const updateTaskTC =
@@ -126,7 +168,12 @@ export const updateTaskTC =
     taskId: string,
     domainModel: UpdateDomainTaskModelType
   ) =>
-  (dispatch: Dispatch<ActionsType>, getState: () => AppRootState) => {
+  (
+    dispatch: Dispatch<
+      ActionsType | SetAppErrorActionType | SetAppStatusActionType
+    >,
+    getState: () => AppRootState
+  ) => {
     const state = getState();
 
     const task = state.tasks[todolistId].find((task) => task.id === taskId);
@@ -146,10 +193,19 @@ export const updateTaskTC =
       ...domainModel,
     };
 
-    todolistAPI.updateTask(todolistId, taskId, apiModel).then((res) => {
-      let action = UpdateTaskAC(todolistId, taskId, apiModel);
-      dispatch(action);
-    });
+    todolistAPI
+      .updateTask(todolistId, taskId, apiModel)
+      .then((res) => {
+        if ((res.data.resultCode = ResultCode.Success)) {
+          let action = UpdateTaskAC(todolistId, taskId, apiModel);
+          dispatch(action);
+        } else {
+          handleServerAppError(res.data, dispatch);
+        }
+      })
+      .catch((error) => {
+        handleServerNetworkError(error, dispatch);
+      });
   };
 
 // types

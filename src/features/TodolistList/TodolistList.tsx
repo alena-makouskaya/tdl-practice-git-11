@@ -102,6 +102,7 @@ export const TodolistList = (props: Props) => {
             id={tl.id}
             title={tl.title}
             filter={tl.filter}
+            entityStatus={tl.entityStatus}
             tasks={filteredTasks}
             removeTask={removeTask}
             addTask={addTask}
