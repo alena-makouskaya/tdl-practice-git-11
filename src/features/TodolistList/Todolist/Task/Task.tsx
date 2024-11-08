@@ -1,7 +1,7 @@
 // @flow
 import * as React from "react";
-import { EditableSpan } from "./EditableSpan";
-import { TaskStatuses, TaskType } from "../api/todolists-api";
+import { TaskStatuses, TaskType } from "../../../../api/todolists-api";
+import { EditableSpan } from "../../../../components/EditableSpan/EditableSpan";
 type TaskPropsType = {
   todolistId: string;
   task: TaskType;

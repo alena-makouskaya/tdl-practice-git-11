@@ -1,42 +1,29 @@
-import React, { useCallback, useEffect, useReducer, useState } from "react";
-import logo from "./logo.svg";
-import "./App.css";
-import { Todolist } from "./components/Todolist";
-
-import { AddItemForm } from "./components/AddItemForm";
+// @flow
+import * as React from "react";
+import { AddItemForm } from "../../components/AddItemForm/AddItemForm";
+import { Todolist } from "./Todolist/Todolist";
+import { AppRootState, useAppDispatch } from "../../app/store";
+import { useSelector } from "react-redux";
 import {
-  addTodolistAC,
   addTodolistTC,
   changeTodolistFilterAC,
-  editTodolistTitleAC,
   editTodolistTitleTC,
   fetchTodolistsTC,
   FilterValueType,
-  removeTodolistAC,
   removeTodolistTC,
-  setTodolistsAC,
   TodolistDomainType,
-  todolistsReducer,
-} from "./state/todolists-reducer";
+} from "../../state/todolists-reducer";
 import {
-  AddTaskAC,
   addTaskTC,
-  RemoveTaskAC,
   removeTaskTC,
-  tasksReducer,
+  TasksStateType,
   updateTaskTC,
-} from "./state/tasks-reducer";
-import { useDispatch, useSelector } from "react-redux";
-import { AppRootState, useAppDispatch } from "./app/store";
-import { TaskStatuses, TaskType, todolistAPI } from "./api/todolists-api";
+} from "../../state/tasks-reducer";
+import { TaskStatuses } from "../../api/todolists-api";
+import { useEffect } from "react";
+type Props = {};
 
-export type TasksStateType = {
-  [key: string]: TaskType[];
-};
-
-const App = React.memo(() => {
-  console.log("App is called");
-
+export const TodolistList = (props: Props) => {
   let dispatch = useAppDispatch();
 
   const todolists = useSelector<AppRootState, Array<TodolistDomainType>>(
@@ -63,7 +50,7 @@ const App = React.memo(() => {
 
   const changeTaskStatus = React.useCallback(
     (todolistId: string, taskId: string, status: TaskStatuses) => {
-      const thunk = updateTaskTC(todolistId, taskId,  {status});
+      const thunk = updateTaskTC(todolistId, taskId, { status });
       dispatch(thunk);
     },
     []
@@ -71,7 +58,7 @@ const App = React.memo(() => {
 
   const editTaskTitle = React.useCallback(
     (todolistId: string, taskId: string, title: string) => {
-      const thunk = updateTaskTC(todolistId, taskId,  {title});
+      const thunk = updateTaskTC(todolistId, taskId, { title });
       dispatch(thunk);
     },
     []
@@ -102,9 +89,8 @@ const App = React.memo(() => {
     },
     []
   );
-
   return (
-    <div className="App">
+    <div>
       <AddItemForm callBack={addTodolist} />
 
       {todolists.map((tl) => {
@@ -129,6 +115,4 @@ const App = React.memo(() => {
       })}
     </div>
   );
-});
-
-export default App;
+};
